@@ -20,31 +20,32 @@ class Vagrant(FlowLauncher):
     stopped_ico = "Images/stopped.png"
 
     def query(self, arguments: str):
+        if vms := self.list_vms():
+            self.vms = vms
+        else:
+            return
         if not arguments:
-            if vms := self.list_vms():
-                self.vms = vms
-                return [
-                    {
-                        "Title": vm.name.strip(),
-                        "SubTitle": f"ID: {vm.id.strip()}, 当前状态: {vm.state.strip()}",
-                        "IcoPath": (
-                            self.running_ico
+            return [
+                {
+                    "Title": vm.name.strip(),
+                    "SubTitle": f"ID: {vm.id.strip()}, 当前状态: {vm.state.strip()}",
+                    "IcoPath": (
+                        self.running_ico
+                        if vm.state.strip() == "running"
+                        else self.stopped_ico
+                    ),
+                    "jsonRPCAction": {
+                        "method": (
+                            "suspend_vm"
                             if vm.state.strip() == "running"
-                            else self.stopped_ico
+                            else "up_vm"
                         ),
-                        "jsonRPCAction": {
-                            "method": (
-                                "suspend_vm"
-                                if vm.state.strip() == "running"
-                                else "up_vm"
-                            ),
-                            "parameters": [vm.id.strip()],
-                        },
-                    }
-                    for vm in self.vms
-                ]
-            else:
-                return
+                        "parameters": [vm.id.strip()],
+                    },
+                }
+                for vm in self.vms
+            ]
+
         input_name = arguments.strip().split()[0]
         if vm := [vm for vm in self.vms if vm.name.strip() == input_name][0]:
             return [
