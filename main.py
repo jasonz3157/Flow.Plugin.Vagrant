@@ -16,8 +16,7 @@ from flowlauncher import FlowLauncher
 
 
 class Vagrant(FlowLauncher):
-    running_ico = "Images/running.png"
-    stopped_ico = "Images/stopped.png"
+    # running saved poweroff
 
     def query(self, arguments: str):
         if vms := self.list_vms():
@@ -29,18 +28,13 @@ class Vagrant(FlowLauncher):
                 {
                     "Title": vm.name.strip(),
                     "SubTitle": f"ID: {vm.id.strip()}, 当前状态: {vm.state.strip()}",
-                    "IcoPath": (
-                        self.running_ico
-                        if vm.state.strip() == "running"
-                        else self.stopped_ico
-                    ),
+                    "IcoPath": f"Images/{vm.state.strip()}.png",
                     "jsonRPCAction": {
-                        "method": (
-                            "suspend_vm"
-                            if vm.state.strip() == "running"
-                            else "up_vm"
-                        ),
-                        "parameters": [vm.id.strip()],
+                        "method": "control_vm",
+                        "parameters": [
+                            vm.id.strip(),
+                            "up" if vm.state.strip() != "running" else "suspend",
+                        ],
                     },
                 }
                 for vm in self.vms
@@ -48,22 +42,24 @@ class Vagrant(FlowLauncher):
 
         input_name = arguments.strip().split()[0]
         if vm := [vm for vm in self.vms if vm.name.strip() == input_name][0]:
-            return [
-                {
-                    "Title": (
-                        f"启动 {vm.name}"
-                        if vm.state.strip() != "running"
-                        else f"暂停 {vm.name}"
-                    ),
-                    "SubTitle": f"ID: {vm.id.strip()}, 当前状态: {vm.state.strip()}",
-                    "jsonRPCAction": {
-                        "method": (
-                            "suspend_vm" if vm.state.strip() == "running" else "up_vm"
-                        ),
-                        "parameters": [vm.id.strip()],
-                    },
-                }
-            ]
+            msgs = []
+            if vm.state.strip() == "running":
+                actions = ["suspend", "halt"]
+            else:
+                actions = ["up"]
+            for action in actions:
+                msgs.append(
+                    {
+                        "Title": vm.name.strip(),
+                        "SubTitle": f"ID: {vm.id.strip()}, 当前状态: {vm.state.strip()}",
+                        "IcoPath": f"Images/{action}.png",
+                        "jsonRPCAction": {
+                            "method": "control_vm",
+                            "parameters": [vm.id.strip(), action],
+                        },
+                    }
+                )
+            return msgs
         else:
             return
 
@@ -80,15 +76,15 @@ class Vagrant(FlowLauncher):
         except Exception:
             return
 
-    def up_vm(self, id):
-        cmd = ["vagrant", "up", id]
-        output = check_output(cmd, shell=True).decode()
-        return output
-
-    def suspend_vm(self, id):
-        cmd = ["vagrant", "suspend", id]
-        output = check_output(cmd, shell=True).decode()
-        return output
+    def control_vm(self, id, action):
+        check_output(["vagrant", action, id], shell=True).decode()
+        return [
+            {
+                "Title": f"{action} {id}",
+                "SubTitle": "进行中...",
+                "IcoPath": "Images/app.png",
+            }
+        ]
 
 
 if __name__ == "__main__":
