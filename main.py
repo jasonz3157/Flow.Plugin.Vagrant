@@ -25,13 +25,21 @@ class Vagrant(FlowLauncher):
                 self.vms = vms
                 return [
                     {
-                        "Title": vm.id,
-                        "SubTitle": f"{vm.name} {vm.state}",
+                        "Title": vm.name.strip(),
+                        "SubTitle": f"ID: {vm.id.strip()}, 当前状态: {vm.state.strip()}",
                         "IcoPath": (
                             self.running_ico
-                            if {vm.state} == "running"
+                            if vm.state.strip() == "running"
                             else self.stopped_ico
                         ),
+                        "jsonRPCAction": {
+                            "method": (
+                                "suspend_vm"
+                                if vm.state.strip() == "running"
+                                else "up_vm"
+                            ),
+                            "parameters": [vm.id.strip()],
+                        },
                     }
                     for vm in self.vms
                 ]
@@ -50,6 +58,16 @@ class Vagrant(FlowLauncher):
             ]
         except Exception:
             return
+
+    def up_vm(self, id):
+        cmd = ["vagrant", "up", id]
+        output = check_output(cmd, shell=True).decode()
+        return output
+
+    def suspend_vm(self, id):
+        cmd = ["vagrant", "suspend", id]
+        output = check_output(cmd, shell=True).decode()
+        return output
 
 
 if __name__ == "__main__":
