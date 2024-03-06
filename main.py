@@ -45,6 +45,28 @@ class Vagrant(FlowLauncher):
                 ]
             else:
                 return
+        input_id = arguments.strip().split()[0]
+        if not re.match(r"^[a-z0-9]{7}$", input_id):
+            return
+        elif vm := [vm for vm in self.vms if vm.id.strip() == input_id][0]:
+            return [
+                {
+                    "Title": (
+                        f"启动 {vm.name}"
+                        if vm.state.strip() != "running"
+                        else f"暂停 {vm.name}"
+                    ),
+                    "SubTitle": f"ID: {vm.id.strip()}, 当前状态: {vm.state.strip()}",
+                    "jsonRPCAction": {
+                        "method": (
+                            "suspend_vm" if vm.state.strip() == "running" else "up_vm"
+                        ),
+                        "parameters": [vm.id.strip()],
+                    },
+                }
+            ]
+        else:
+            return
 
     def list_vms(self):
         cmd = ["vagrant", "global-status"]
