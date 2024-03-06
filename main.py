@@ -80,7 +80,7 @@ class Vagrant(FlowLauncher):
 
     def control_vm(self, id, action):
         subprocess.Popen(["vagrant", action, id], shell=True)
-        FlowLauncherAPI.hide_app()
+        return
 
 
 if __name__ == "__main__":
