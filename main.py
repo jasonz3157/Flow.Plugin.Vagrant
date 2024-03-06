@@ -2,9 +2,9 @@
 
 import os
 import re
+import subprocess
 import sys
 from collections import namedtuple
-from subprocess import check_output
 
 parent_folder_path = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(parent_folder_path)
@@ -51,7 +51,7 @@ class Vagrant(FlowLauncher):
             for action in actions:
                 msgs.append(
                     {
-                        "Title": f"{action.upper()} VM {vm.name.strip()}",
+                        "Title": f"{action.upper()} {vm.name.strip()}",
                         "SubTitle": f"{vm.id.strip()}",
                         "IcoPath": f"Images/{action}.png",
                         "jsonRPCAction": {
@@ -67,7 +67,7 @@ class Vagrant(FlowLauncher):
 
     def list_vms(self):
         cmd = ["vagrant", "global-status"]
-        output = check_output(cmd, shell=True).decode().splitlines()
+        output = subprocess.check_output(cmd, shell=True).decode().splitlines()
         vm = namedtuple("vm", ["id", "name", "state"])
         try:
             return [
@@ -79,7 +79,7 @@ class Vagrant(FlowLauncher):
             return
 
     def control_vm(self, id, action):
-        check_output(["vagrant", action, id], shell=True).decode()
+        subprocess.Popen(["vagrant", action, id], shell=True).decode()
 
 
 if __name__ == "__main__":
