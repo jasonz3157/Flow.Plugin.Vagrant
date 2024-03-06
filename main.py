@@ -35,6 +35,7 @@ class Vagrant(FlowLauncher):
                             vm.id.strip(),
                             "up" if vm.state.strip() != "running" else "suspend",
                         ],
+                        "dontHideAfterAction": False,
                     },
                 }
                 for vm in self.vms
@@ -50,12 +51,13 @@ class Vagrant(FlowLauncher):
             for action in actions:
                 msgs.append(
                     {
-                        "Title": f"{action.upper()} {vm.name.strip()}",
+                        "Title": action.upper(),
                         "SubTitle": f"{vm.id.strip()} ({vm.state.strip()})",
                         "IcoPath": f"Images/{action}.png",
                         "jsonRPCAction": {
                             "method": "control_vm",
                             "parameters": [vm.id.strip(), action],
+                            "dontHideAfterAction": False,
                         },
                     }
                 )
