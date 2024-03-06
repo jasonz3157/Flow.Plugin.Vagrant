@@ -27,7 +27,7 @@ class Vagrant(FlowLauncher):
             return [
                 {
                     "Title": vm.name.strip(),
-                    "SubTitle": f"ID: {vm.id.strip()}, 当前状态: {vm.state.strip()}",
+                    "SubTitle": f"{vm.id.strip()} ({vm.state.strip()})",
                     "IcoPath": f"Images/{vm.state.strip()}.png",
                     "jsonRPCAction": {
                         "method": "control_vm",
@@ -50,8 +50,8 @@ class Vagrant(FlowLauncher):
             for action in actions:
                 msgs.append(
                     {
-                        "Title": vm.name.strip(),
-                        "SubTitle": f"ID: {vm.id.strip()}, 当前状态: {vm.state.strip()}",
+                        "Title": f"{action.upper()} {vm.name.strip()}",
+                        "SubTitle": f"{vm.id.strip()} ({vm.state.strip()})",
                         "IcoPath": f"Images/{action}.png",
                         "jsonRPCAction": {
                             "method": "control_vm",
@@ -78,13 +78,6 @@ class Vagrant(FlowLauncher):
 
     def control_vm(self, id, action):
         check_output(["vagrant", action, id], shell=True).decode()
-        return [
-            {
-                "Title": f"{action} {id}",
-                "SubTitle": "进行中...",
-                "IcoPath": "Images/app.png",
-            }
-        ]
 
 
 if __name__ == "__main__":
