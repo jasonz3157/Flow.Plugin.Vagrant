@@ -45,10 +45,8 @@ class Vagrant(FlowLauncher):
                 ]
             else:
                 return
-        input_id = arguments.strip().split()[0]
-        if not re.match(r"^[a-z0-9]{7}$", input_id):
-            return
-        elif vm := [vm for vm in self.vms if vm.id.strip() == input_id][0]:
+        input_name = arguments.strip().split()[0]
+        if vm := [vm for vm in self.vms if vm.name.strip() == input_name][0]:
             return [
                 {
                     "Title": (
