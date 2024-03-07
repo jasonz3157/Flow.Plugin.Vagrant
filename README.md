@@ -17,3 +17,5 @@ Use virtual machine's name as parameter:
 
     <img src="https://s2.loli.net/2024/03/07/LcI7l9g8eVRhTbP.png" width=400>
 - If the virtual machine is not RUNNING, you'll see UP action.
+
+    <img src="https://s2.loli.net/2024/03/07/KLmpyD3PlFbJSuo.png" width=400>
