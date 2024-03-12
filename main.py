@@ -45,9 +45,9 @@ class Vagrant(FlowLauncher):
         if vm := [vm for vm in self.vms if vm.name.strip() == input_name][0]:
             msgs = []
             if vm.state.strip() == "running":
-                actions = ["suspend", "halt"]
+                actions = ["suspend", "halt", "up"]
             else:
-                actions = ["up"]
+                actions = ["up", "suspend", "halt"]
             for action in actions:
                 msgs.append(
                     {
