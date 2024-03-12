@@ -52,7 +52,7 @@ class Vagrant(FlowLauncher):
                 msgs.append(
                     {
                         "Title": f"{action.upper()} {vm.name.strip()}",
-                        # "SubTitle": f"{vm.id.strip()}",
+                        "SubTitle": f"{vm.id.strip()}",
                         "IcoPath": f"Images/{action}.png",
                         "jsonRPCAction": {
                             "method": "control_vm",
