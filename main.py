@@ -32,7 +32,6 @@ class Vagrant(FlowLauncher):
                                 vm.id.strip(),
                                 "up" if vm.state.strip() != "running" else "suspend",
                             ],
-                            "dontHideAfterAction": False,
                         },
                     }
                     for vm in vms
@@ -57,7 +56,6 @@ class Vagrant(FlowLauncher):
                             "jsonRPCAction": {
                                 "method": "control_vm",
                                 "parameters": [vm.id.strip(), action],
-                                "dontHideAfterAction": False,
                             },
                         }
                     )
@@ -88,7 +86,7 @@ class Vagrant(FlowLauncher):
             return
 
     def control_vm(self, id, action):
-        subprocess.Popen(["vagrant", action, id], shell=True)
+        subprocess.run(["vagrant", action, id])
         return
 
 
