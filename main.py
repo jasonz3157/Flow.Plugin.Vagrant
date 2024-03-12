@@ -17,17 +17,17 @@ from flowlauncher import FlowLauncher, FlowLauncherAPI
 
 class Vagrant(FlowLauncher):
     # running saved poweroff
+    def __init__(self):
+        self.vms = self.list_vms()
 
     def query(self, arguments: str):
-        if vms := self.list_vms():
-            self.vms = vms
-        else:
+        if not self.vms:
             return
         if not arguments:
             return [
                 {
                     "Title": vm.name.strip(),
-                    "SubTitle": f"{vm.id.strip()} ({vm.state.strip()})",
+                    "SubTitle": f"{vm.provider} {vm.id.strip()} ({vm.state.strip()})",
                     "IcoPath": f"Images/{vm.state.strip()}.png",
                     "jsonRPCAction": {
                         "method": "control_vm",
@@ -52,7 +52,7 @@ class Vagrant(FlowLauncher):
                 msgs.append(
                     {
                         "Title": f"{action.upper()} {vm.name.strip()}",
-                        "SubTitle": f"{vm.id.strip()}",
+                        # "SubTitle": f"{vm.id.strip()}",
                         "IcoPath": f"Images/{action}.png",
                         "jsonRPCAction": {
                             "method": "control_vm",
@@ -67,12 +67,17 @@ class Vagrant(FlowLauncher):
 
     def list_vms(self):
         cmd = "vagrant global-status --prune"
-        subprocess.Popen(cmd, shell=True)
+        # subprocess.check_output(cmd, shell=True)
         output = subprocess.check_output(cmd, shell=True).decode().splitlines()
-        vm = namedtuple("vm", ["id", "name", "state"])
+        vm = namedtuple("vm", ["id", "name", "state", "provider"])
         try:
             return [
-                vm(id=n.split()[0], name=n.split()[1], state=n.split()[3])
+                vm(
+                    id=n.split()[0],
+                    name=n.split()[1],
+                    state=n.split()[3],
+                    provider=n.split()[2],
+                )
                 for n in output
                 if re.match(r"^[a-z0-9]{7}\s", n)
             ]
