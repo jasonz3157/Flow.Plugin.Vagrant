@@ -17,32 +17,31 @@ from flowlauncher import FlowLauncher, FlowLauncherAPI
 
 class Vagrant(FlowLauncher):
     # running saved poweroff
-    def __init__(self):
-        self.vms = self.list_vms()
 
     def query(self, arguments: str):
-        if not self.vms:
-            return
         if not arguments:
-            return [
-                {
-                    "Title": vm.name.strip(),
-                    "SubTitle": f"{vm.provider} {vm.id.strip()} ({vm.state.strip()})",
-                    "IcoPath": f"Images/{vm.state.strip()}.png",
-                    "jsonRPCAction": {
-                        "method": "control_vm",
-                        "parameters": [
-                            vm.id.strip(),
-                            "up" if vm.state.strip() != "running" else "suspend",
-                        ],
-                        "dontHideAfterAction": False,
-                    },
-                }
-                for vm in self.vms
-            ]
+            if vms := self.list_vms():
+                return [
+                    {
+                        "Title": vm.name.strip(),
+                        "SubTitle": f"{vm.provider} {vm.id.strip()} ({vm.state.strip()})",
+                        "IcoPath": f"Images/{vm.state.strip()}.png",
+                        "jsonRPCAction": {
+                            "method": "control_vm",
+                            "parameters": [
+                                vm.id.strip(),
+                                "up" if vm.state.strip() != "running" else "suspend",
+                            ],
+                            "dontHideAfterAction": False,
+                        },
+                    }
+                    for vm in vms
+                ]
+            else:
+                return
 
         input_name = arguments.strip().split()[0]
-        if vm := [vm for vm in self.vms if vm.name.strip() == input_name][0]:
+        if vm := [vm for vm in vms if vm.name.strip() == input_name][0]:
             msgs = []
             if vm.state.strip() == "running":
                 actions = ["suspend", "halt"]
