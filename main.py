@@ -50,8 +50,8 @@ class Vagrant(FlowLauncher):
                 for action in actions:
                     msgs.append(
                         {
-                            "Title": f"{action.upper()} {vm.name.strip()}",
-                            "SubTitle": f"{vm.id.strip()} {vm.path}",
+                            "Title": action,
+                            "SubTitle": f"{vm.name.strip()} {vm.id.strip()} {vm.path}",
                             "IcoPath": f"Images/{action}.png",
                             "jsonRPCAction": {
                                 "method": "control_vm",
@@ -88,7 +88,7 @@ class Vagrant(FlowLauncher):
 
     def control_vm(self, id, action, path=None):
         if action == "open dir" and path:
-            os.startfile(os.path(path))
+            os.startfile(os.path.realpath(path))
         else:
             subprocess.run(["vagrant", action, id])
 
