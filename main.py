@@ -80,11 +80,11 @@ class Vagrant(FlowLauncher):
                 )
                 vms.append(
                     vm(
-                        id=groups("id"),
-                        name=groups("name"),
-                        state=groups("state"),
-                        provider=groups("prov"),
-                        path=groups("path"),
+                        id=groups.group("id"),
+                        name=groups.group("name"),
+                        state=groups.group("state"),
+                        provider=groups.group("prov"),
+                        path=groups.group("path"),
                     )
                 )
                 del groups
