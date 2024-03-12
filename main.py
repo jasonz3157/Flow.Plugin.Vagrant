@@ -85,7 +85,8 @@ class Vagrant(FlowLauncher):
         for n in output:
             try:
                 grps = re.search(
-                    "^([a-z0-9]{7})\s+([a-z0-9]+)\s+([a-z]+)\s+([a-z]+)", n
+                    r"^([a-z0-9]{7})\s+([a-z0-9]+)\s+([a-z]+)\s+([a-z]+)\s",
+                    n,
                 )
                 return grps.group(3)
             except Exception:
