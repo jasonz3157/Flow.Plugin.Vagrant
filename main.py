@@ -45,9 +45,9 @@ class Vagrant(FlowLauncher):
         if vm := [vm for vm in self.vms if vm.name.strip() == input_name][0]:
             msgs = []
             if vm.state.strip() == "running":
-                actions = ["suspend", "halt", "up"]
+                actions = ["suspend", "halt"]
             else:
-                actions = ["up", "suspend", "halt"]
+                actions = ["up"]
             for action in actions:
                 msgs.append(
                     {
@@ -71,12 +71,26 @@ class Vagrant(FlowLauncher):
         vm = namedtuple("vm", ["id", "name", "state"])
         try:
             return [
-                vm(id=n.split()[0], name=n.split()[1], state=n.split()[3])
+                vm(id=n.split()[0], name=n.split()[1], state=self.stat_vm(n.split()[0]))
                 for n in output
                 if re.match(r"^[a-z0-9]{7}\s", n)
             ]
         except Exception:
             return
+
+    def stat_vm(self, id):
+        """global-status has cache, use status id"""
+        cmd = ["vagrant", "status", id]
+        output = subprocess.check_output(cmd, shell=True).decode().splitlines()
+        try:
+            for n in output:
+                return (
+                    n.split()[3]
+                    if re.match(r"^[a-z0-9]{7}\s+[a-z0-9]+\s+[a-z]+\s+[a-z]+\s+")
+                    else "unknown"
+                )
+        except Exception:
+            return "unknown"
 
     def control_vm(self, id, action):
         subprocess.Popen(["vagrant", action, id], shell=True)
