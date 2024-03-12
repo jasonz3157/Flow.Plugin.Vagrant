@@ -71,20 +71,26 @@ class Vagrant(FlowLauncher):
         del _o
         output = subprocess.check_output(cmd[:2], shell=True).decode().splitlines()
         vm = namedtuple("vm", ["id", "name", "state", "provider", "path"])
-        try:
-            return [
-                vm(
-                    id=n.split()[0],
-                    name=n.split()[1],
-                    state=n.split()[3],
-                    provider=n.split()[2],
-                    path=n.split()[4:],
+        vms = []
+        for line in output:
+            try:
+                groups = re.search(
+                    r"^(?P<id>[a-z0-9]{7})\s+(?P<name>[a-z0-9]+)\s+(?P<prov>[a-z]+)\s+(?P<state>[a-z]+)\s+(?P<path>.*)$",
+                    line,
                 )
-                for n in output
-                if re.match(r"^[a-z0-9]{7}\s", n)
-            ]
-        except Exception:
-            return
+                vms.append(
+                    vm(
+                        id=groups("id"),
+                        name=groups("name"),
+                        state=groups("state"),
+                        provider=groups("prov"),
+                        path=groups("path"),
+                    )
+                )
+                del groups
+            except Exception:
+                continue
+        return vms
 
     def control_vm(self, id, action, path=None):
         if action == "open dir" and path:
