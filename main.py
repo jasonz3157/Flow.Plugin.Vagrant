@@ -41,26 +41,29 @@ class Vagrant(FlowLauncher):
                 return
 
         input_name = arguments.strip().split()[0]
-        if vm := [vm for vm in vms if vm.name.strip() == input_name][0]:
-            msgs = []
-            if vm.state.strip() == "running":
-                actions = ["suspend", "halt"]
+        if vms := self.list_vms():
+            if vm := [vm for vm in vms if vm.name.strip() == input_name][0]:
+                msgs = []
+                if vm.state.strip() == "running":
+                    actions = ["suspend", "halt"]
+                else:
+                    actions = ["up"]
+                for action in actions:
+                    msgs.append(
+                        {
+                            "Title": f"{action.upper()} {vm.name.strip()}",
+                            "SubTitle": f"{vm.id.strip()}",
+                            "IcoPath": f"Images/{action}.png",
+                            "jsonRPCAction": {
+                                "method": "control_vm",
+                                "parameters": [vm.id.strip(), action],
+                                "dontHideAfterAction": False,
+                            },
+                        }
+                    )
+                return msgs
             else:
-                actions = ["up"]
-            for action in actions:
-                msgs.append(
-                    {
-                        "Title": f"{action.upper()} {vm.name.strip()}",
-                        "SubTitle": f"{vm.id.strip()}",
-                        "IcoPath": f"Images/{action}.png",
-                        "jsonRPCAction": {
-                            "method": "control_vm",
-                            "parameters": [vm.id.strip(), action],
-                            "dontHideAfterAction": False,
-                        },
-                    }
-                )
-            return msgs
+                return
         else:
             return
 
