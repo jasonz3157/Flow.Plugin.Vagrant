@@ -2,11 +2,13 @@ name: Release
 
 on:
   workflow_dispatch:
-  # push:
-  #   branches: [ master ]
-  #   paths-ignore:
-  #     - .github/workflows/*
-  #     - '**.md'
+  push:
+    branches: [ master ]
+    paths-ignore:
+      - .github/workflows/*
+      - '**.md'
+      - .gitignore
+      - requirements.txt
 
 jobs:
   publish:

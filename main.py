@@ -82,14 +82,15 @@ class Vagrant(FlowLauncher):
         """global-status has cache, use status id"""
         cmd = ["vagrant", "status", id]
         output = subprocess.check_output(cmd, shell=True).decode().splitlines()
-        try:
-            for n in output:
-                return (
-                    n.split()[3]
-                    if re.match(r"^[a-z0-9]{7}\s+[a-z0-9]+\s+[a-z]+\s+[a-z]+\s+")
-                    else "unknown"
+        for n in output:
+            try:
+                grps = re.search(
+                    "^([a-z0-9]{7})\s+([a-z0-9]+)\s+([a-z]+)\s+([a-z]+)", n
                 )
-        except Exception:
+                return grps.group(3)
+            except Exception:
+                continue
+        else:
             return "unknown"
 
     def control_vm(self, id, action):
