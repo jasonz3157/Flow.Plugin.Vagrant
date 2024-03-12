@@ -69,8 +69,8 @@ class Vagrant(FlowLauncher):
 
     def list_vms(self):
         cmd = ["vagrant", "global-status", "--prune"]
-        subprocess.check_output(cmd)
-
+        _o = subprocess.check_output(cmd, shell=True)
+        del _o
         output = subprocess.check_output(cmd, shell=True).decode().splitlines()
         vm = namedtuple("vm", ["id", "name", "state", "provider"])
         try:
