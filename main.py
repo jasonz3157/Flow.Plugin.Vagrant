@@ -30,7 +30,7 @@ class Vagrant(FlowLauncher):
                             "method": "control_vm",
                             "parameters": [
                                 vm.id.strip(),
-                                "up" if vm.state.strip() != "running" else "suspend",
+                                "up" if vm.state.strip() != "running" else "halt",
                             ],
                         },
                     }
