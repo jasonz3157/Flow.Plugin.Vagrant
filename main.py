@@ -19,11 +19,15 @@ class Vagrant(FlowLauncher):
     # running saved poweroff
 
     def query(self, arguments: str):
-        if not arguments or len(arguments) < 3:
-            return
+        if not arguments:
+            return [
+                {"Title": "list", "SubTitle": "List vms"},
+                {"Title": "vm", "SubTitle": "Control a vm"},
+            ]
 
-        input_name = arguments.strip().split()[0]
-        if input_name == "list":
+        user_inputs = arguments.strip().split()
+        user_action = user_inputs[0]
+        if user_action == "list":
             if vms := self.list_vms():
                 return [
                     {
@@ -42,30 +46,34 @@ class Vagrant(FlowLauncher):
                 ]
             else:
                 return
-        if vms := self.list_vms():
-            if vm := [vm for vm in vms if vm.name.strip() == input_name][0]:
-                msgs = []
-                if vm.state.strip() == "running":
-                    actions = ["suspend", "halt", "open dir"]
+        elif user_action == "vm":
+            user_vmname = user_inputs[1]
+            if len(user_vmname) < 3:
+                return
+            if vms := self.list_vms():
+                if vm := [vm for vm in vms if vm.name.strip() == user_vmname][0]:
+                    msgs = []
+                    if vm.state.strip() == "running":
+                        actions = ["suspend", "halt", "open dir"]
+                    else:
+                        actions = ["up", "open dir"]
+                    for action in actions:
+                        msgs.append(
+                            {
+                                "Title": action,
+                                "SubTitle": f"{vm.name.strip()} {vm.id.strip()} {vm.path}",
+                                "IcoPath": f"Images/{action}.png",
+                                "jsonRPCAction": {
+                                    "method": "control_vm",
+                                    "parameters": [vm.id.strip(), action, vm.path],
+                                },
+                            }
+                        )
+                    return msgs
                 else:
-                    actions = ["up", "open dir"]
-                for action in actions:
-                    msgs.append(
-                        {
-                            "Title": action,
-                            "SubTitle": f"{vm.name.strip()} {vm.id.strip()} {vm.path}",
-                            "IcoPath": f"Images/{action}.png",
-                            "jsonRPCAction": {
-                                "method": "control_vm",
-                                "parameters": [vm.id.strip(), action, vm.path],
-                            },
-                        }
-                    )
-                return msgs
+                    return
             else:
                 return
-        else:
-            return
 
     def list_vms(self):
         cmd = ["vagrant", "global-status", "--prune"]
