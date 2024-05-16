@@ -21,8 +21,12 @@ class Vagrant(FlowLauncher):
     def query(self, arguments: str):
         if not arguments:
             return [
-                {"Title": "list", "SubTitle": "List vms"},
-                {"Title": "vm", "SubTitle": "Control a vm"},
+                {"Title": "list", "SubTitle": "List vms", "IcoPath": "Images/list.png"},
+                {
+                    "Title": "ctrl",
+                    "SubTitle": "Control a vm",
+                    "IcoPath": "Images/ctrl.png",
+                },
             ]
 
         user_inputs = arguments.strip().split()
@@ -46,9 +50,11 @@ class Vagrant(FlowLauncher):
                 ]
             else:
                 return
-        elif user_action == "vm":
-            user_vmname = user_inputs[1]
-            if len(user_vmname) < 3:
+        elif user_action == "ctrl":
+            try:
+                user_vmname = user_inputs[1]
+                assert len(user_vmname) >= 3
+            except Exception:
                 return
             if vms := self.list_vms():
                 if vm := [vm for vm in vms if vm.name.strip() == user_vmname][0]:
