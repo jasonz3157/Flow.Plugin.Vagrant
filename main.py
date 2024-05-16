@@ -19,7 +19,11 @@ class Vagrant(FlowLauncher):
     # running saved poweroff
 
     def query(self, arguments: str):
-        if not arguments:
+        if not arguments or len(arguments) < 3:
+            return
+
+        input_name = arguments.strip().split()[0]
+        if input_name == "list":
             if vms := self.list_vms():
                 return [
                     {
@@ -38,8 +42,6 @@ class Vagrant(FlowLauncher):
                 ]
             else:
                 return
-
-        input_name = arguments.strip().split()[0]
         if vms := self.list_vms():
             if vm := [vm for vm in vms if vm.name.strip() == input_name][0]:
                 msgs = []
