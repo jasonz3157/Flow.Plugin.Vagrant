@@ -4,115 +4,58 @@ import os
 import re
 import subprocess
 import sys
-from collections import namedtuple
 
 parent_folder_path = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(parent_folder_path)
 sys.path.append(os.path.join(parent_folder_path, "lib"))
 sys.path.append(os.path.join(parent_folder_path, "plugin"))
 
-
 from flowlauncher import FlowLauncher
 
 
 class Vagrant(FlowLauncher):
     # running saved poweroff
-
-    def query(self, arguments: str):
-        if not arguments:
-            return [
-                {"Title": "list", "SubTitle": "List vms", "IcoPath": "Images/list.png"},
-                {
-                    "Title": "ctrl",
-                    "SubTitle": "Control a vm",
-                    "IcoPath": "Images/ctrl.png",
-                },
-            ]
-
-        user_inputs = arguments.strip().split()
-        user_action = user_inputs[0]
-        if user_action == "list":
-            if vms := self.list_vms():
-                return [
-                    {
-                        "Title": vm.name.strip(),
-                        "SubTitle": f"{vm.provider} {vm.id.strip()} ({vm.state.strip()})",
-                        "IcoPath": f"Images/{vm.state.strip()}.png",
-                        "jsonRPCAction": {
-                            "method": "control_vm",
-                            "parameters": [
-                                vm.id.strip(),
-                                "up" if vm.state.strip() != "running" else "halt",
-                            ],
-                        },
-                    }
-                    for vm in vms
-                ]
-            else:
-                return
-        elif user_action == "ctrl":
+    # up suspend halt
+    def list_vm(self, prune=False):
+        cmd = "vagrant global-status --prune" if prune else "vagrant global-status"
+        output = subprocess.check_output(cmd, shell=True).decode("utf-8")
+        output_lines = output.splitlines()
+        reg_vm = re.compile(
+            r"(?P<id>[a-z0-9]{7})\s+(?P<name>\S+)\s+virtualbox\s+(?P<state>[a-z]+)\s+(?P<dir>.+)\s+"
+        )
+        all_vms = []
+        for line in output_lines:
+            m = reg_vm.search(line)
             try:
-                user_vmname = user_inputs[1]
-                assert len(user_vmname) >= 3
-            except Exception:
-                return
-            if vms := self.list_vms():
-                if vm := [vm for vm in vms if vm.name.strip() == user_vmname][0]:
-                    msgs = []
-                    if vm.state.strip() == "running":
-                        actions = ["suspend", "halt", "open dir"]
-                    else:
-                        actions = ["up", "open dir"]
-                    for action in actions:
-                        msgs.append(
-                            {
-                                "Title": action,
-                                "SubTitle": f"{vm.name.strip()} {vm.id.strip()} {vm.path}",
-                                "IcoPath": f"Images/{action}.png",
-                                "jsonRPCAction": {
-                                    "method": "control_vm",
-                                    "parameters": [vm.id.strip(), action, vm.path],
-                                },
-                            }
-                        )
-                    return msgs
-                else:
-                    return
-            else:
-                return
-
-    def list_vms(self):
-        cmd = ["vagrant", "global-status", "--prune"]
-        _o = subprocess.check_output(cmd, shell=True)
-        del _o
-        output = subprocess.check_output(cmd[:2], shell=True).decode().splitlines()
-        vm = namedtuple("vm", ["id", "name", "state", "provider", "path"])
-        vms = []
-        for line in output:
-            try:
-                groups = re.search(
-                    r"^(?P<id>[a-z0-9]{7})\s+(?P<name>[a-z0-9]+)\s+(?P<prov>[a-z]+)\s+(?P<state>[a-z]+)\s+(?P<path>.*)$",
-                    line,
-                )
-                vms.append(
-                    vm(
-                        id=groups.group("id"),
-                        name=groups.group("name"),
-                        state=groups.group("state"),
-                        provider=groups.group("prov"),
-                        path=groups.group("path"),
-                    )
-                )
-                del groups
+                assert m.groupdict()
             except Exception:
                 continue
-        return vms
+            else:
+                all_vms.append(m.groupdict())
+        return all_vms
 
-    def control_vm(self, id, action, path=None):
-        if action == "open dir" and path:
-            os.startfile(os.path.realpath(path))
-        else:
-            subprocess.run(["vagrant", action, id])
+    def query(self, arguments: str):
+        # 没有参数时，获取当前 vm 列表
+        if not arguments:
+            rlist = [
+                {
+                    "Title": _.get("name"),
+                    "SubTitle": _.get("state") + "," + _.get("id"),
+                    "IcoPath": (
+                        "Images/ok.png"
+                        if _.get("state") == "running"
+                        else "Images/notok.png"
+                    ),
+                }
+                for _ in self.list_vm()
+            ] + [
+                {
+                    "Title": "刷新",
+                    "SubTitle": "重新获取虚拟机列表",
+                    "IcoPath": "Images/reload.png",
+                    "jsonRPCAction": {"method": "list_vm", "parameters": [True]},
+                },
+            ]
 
 
 if __name__ == "__main__":
