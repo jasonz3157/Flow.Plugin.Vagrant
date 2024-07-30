@@ -68,12 +68,19 @@ class Vagrant(FlowLauncher):
                         if _.get("state") == "running"
                         else "Images/notok.png"
                     ),
+                    "jsonRPCAction": {
+                        "method": "control_vm",
+                        "parameters": [
+                            vm.get("id"),
+                            "halt" if _.get("state") == "running" else "up",
+                        ],
+                    },
                 }
                 for _ in self.list_vm()
             ] + [
                 {
                     "Title": "刷新",
-                    "SubTitle": "点击以重新获取虚拟机列表及状态",
+                    "SubTitle": "重新获取虚拟机列表及状态",
                     "IcoPath": "Images/reload.png",
                     "jsonRPCAction": {"method": "list_vm", "parameters": [True]},
                 },
