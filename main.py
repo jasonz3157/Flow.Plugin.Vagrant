@@ -71,7 +71,7 @@ class Vagrant(FlowLauncher):
                     "jsonRPCAction": {
                         "method": "control_vm",
                         "parameters": [
-                            vm.get("id"),
+                            _.get("id"),
                             "halt" if _.get("state") == "running" else "up",
                         ],
                     },
