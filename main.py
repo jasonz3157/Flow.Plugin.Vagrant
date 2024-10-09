@@ -13,7 +13,12 @@ sys.path.append(os.path.join(parent_folder_path, "plugin"))
 
 from flowlauncher import FlowLauncher
 
-state_map = {"running": "运行中", "poweroff": "已关机", "saved": "已暂停"}
+state_map = {
+    "running": "运行中",
+    "poweroff": "已关机",
+    "saved": "已暂停",
+    "aborted": "已中止",
+}
 action_map = {
     "suspend": "暂停",
     "up": "启动",
