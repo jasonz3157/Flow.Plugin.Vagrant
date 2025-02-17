@@ -16,7 +16,6 @@ from flowlauncher import FlowLauncher
 state_map = {
     "running": "运行中",
     "poweroff": "已关机",
-    "not running": "已关机",
     "saved": "已暂停",
     "aborted": "已中止",
 }
@@ -37,7 +36,7 @@ class Vagrant(FlowLauncher):
         output = subprocess.check_output(cmd, shell=True).decode("utf-8")
         output_lines = output.splitlines()
         reg_vm = re.compile(
-            r"(?P<id>[a-z0-9]{7})\s+(?P<name>\S+)\s+(?P<provider>virtualbox|vmware_desktop)\s+(?P<state>[a-z\s]+)\s+(?P<dir>[A-Z].+)\s+"
+            r"(?P<id>[a-z0-9]{7})\s+(?P<name>\S+)\s+(?P<provider>virtualbox)\s+(?P<state>[a-z\s]+)\s+(?P<dir>[A-Z].+)\s+"
         )
         all_vms = []
         for line in output_lines:
