@@ -36,7 +36,7 @@ class Vagrant(FlowLauncher):
         output = subprocess.check_output(cmd, shell=True).decode("utf-8")
         output_lines = output.splitlines()
         reg_vm = re.compile(
-            r"(?P<id>[a-z0-9]{7})\s+(?P<name>\S+)\s+(?P<provider>virtualbox)\s+(?P<state>[a-z\s]+)\s+(?P<dir>.+)\s+"
+            r"(?P<id>[a-z0-9]{7})\s+(?P<name>\S+)\s+virtualbox\s+(?P<state>[a-z\s]+)\s+(?P<dir>[A-Z].+)$"
         )
         all_vms = []
         for line in output_lines:
@@ -64,9 +64,9 @@ class Vagrant(FlowLauncher):
                 {
                     "Title": _.get("name"),
                     "SubTitle": state_map.get(_.get("state"))
-                    + ", "
+                    + " | "
                     + _.get("id")
-                    + ", "
+                    + " | "
                     + _.get("dir").rstrip(),
                     "IcoPath": (
                         "Images/ok.png"
